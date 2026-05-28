@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>校園密室逃脫：消失的鑰匙</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-image:
+        linear-gradient(rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.55)),
+        url("images/classroom-bg.png");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      color: #4a3720;
+      overflow-x: hidden;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: min(1440px, 96vw);
+      margin: 0 auto;
+      padding: 22px 24px 34px;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    h1, h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+
+    h1 {
+      color: #fff4c9;
+      font-size: 42px;
+      text-shadow: 0 4px 14px rgba(0, 0, 0, 0.58);
+    }
+
+    h2 {
+      color: #6b4517;
+      font-size: 30px;
+    }
+
+    p {
+      line-height: 1.8;
+      font-size: 20px;
+    }
+
+    .scene {
+      width: 100%;
+      background: rgba(248, 243, 232, 0.88);
+      border: none;
+      border-radius: 34px;
+      padding: 42px 42px 28px;
+      margin: 20px auto 0;
+      box-shadow: 0 14px 38px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(4px);
+      color: #4a3720;
+    }
+
+    .scene p {
+      margin: 0;
+      color: #4d3821;
+      font-size: 23px;
+      line-height: 1.9;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .hint-box {
+      background: #f4e1ad;
+      border: 3px solid #d8a947;
+      border-radius: 22px;
+      color: #62471c;
+      padding: 21px 28px;
+      margin: 28px auto 34px;
+      font-size: 22px;
+      line-height: 1.7;
+      font-weight: 800;
+      text-align: center;
+      max-width: none;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    button {
+      border: none;
+      border-radius: 16px;
+      padding: 16px 20px;
+      background: linear-gradient(90deg, #d58627, #efb547);
+      color: white;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.2s;
+      line-height: 1.5;
+      box-shadow: 0 8px 18px rgba(181, 117, 34, 0.24);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.04);
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+      filter: none;
+    }
+
+    .start-btn {
+      display: block;
+      width: 100%;
+      margin: 12px auto 0;
+      padding: 18px 24px;
+      border-radius: 18px;
+      font-size: 22px;
+    }
+
+    .progress {
+      margin: 18px auto;
+      background: rgba(255, 255, 255, 0.45);
+      border: 2px solid rgba(216, 169, 71, 0.6);
+      border-radius: 999px;
+      height: 20px;
+      overflow: hidden;
+      max-width: 1180px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #d58627, #efb547, #f6d979);
+      transition: 0.4s;
+    }
+
+    .code-display {
+      text-align: center;
+      font-size: 20px;
+      margin: 12px 0 18px;
+      color: #fff4c9;
+      font-weight: 900;
+      text-shadow: 0 3px 8px rgba(0,0,0,0.55);
+    }
+
+    input {
+      width: 100%;
+      padding: 18px 20px;
+      border-radius: 18px;
+      border: 3px solid #d6be8e;
+      font-size: 18px;
+      margin: 15px 0;
+      outline: none;
+      background: #f7f5f1;
+      color: #4a3720;
+    }
+
+    input:focus {
+      border-color: #d6932f;
+      box-shadow: 0 0 0 4px rgba(214, 147, 47, 0.15);
+    }
+
+    .success {
+      color: #166534;
+      font-weight: 900;
+      text-align: center;
+      margin-top: 18px;
+      font-size: 21px;
+    }
+
+    .wrong {
+      color: #b91c1c;
+      font-weight: 900;
+      text-align: center;
+      margin-top: 18px;
+      font-size: 20px;
+    }
+
+    .report {
+      background: rgba(255, 255, 255, 0.94);
+      color: #4a3720;
+      padding: 28px;
+      border-radius: 24px;
+      margin-top: 20px;
+      line-height: 1.8;
+      font-size: 18px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .report h2 {
+      color: #4a3720;
+    }
+
+    .student-card {
+      background: #fff3cf;
+      color: #4a3720;
+      padding: 14px 18px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+      font-weight: 900;
+      border: 2px solid #d8a947;
+    }
+
+    .wrong-list {
+      background: #fee2e2;
+      color: #7f1d1d;
+      border-left: 6px solid #dc2626;
+      padding: 16px 18px;
+      border-radius: 12px;
+      margin: 16px 0;
+      font-weight: bold;
+    }
+
+    .wrong-item {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(127, 29, 29, 0.25);
+      font-weight: bold;
+    }
+
+    .strategy {
+      display: block;
+      margin-top: 4px;
+      font-weight: normal;
+      color: #7f1d1d;
+    }
+
+    .small-text {
+      font-size: 16px;
+      color: #5d4522;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .tag {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.86);
+      color: #7a4c13;
+      border: 2px solid #d8a947;
+      padding: 8px 14px;
+      border-radius: 999px;
+      margin: 5px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .cover-title {
+      font-size: 64px;
+      font-weight: 900;
+      color: #fff4c9;
+      margin: 0;
+      letter-spacing: 3px;
+      text-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+    }
+
+    .cover-subtitle {
+      text-align: center;
+      color: #ffd25e;
+      font-size: 30px;
+      font-weight: 900;
+      margin-top: 10px;
+      margin-bottom: 18px;
+      letter-spacing: 2px;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
+    }
+
+    .cover-card {
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 28px;
+      padding: 36px 32px;
+      max-width: 560px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      color: #4b351b;
+      font-weight: 900;
+      font-size: 20px;
+    }
+
+    .form-group input {
+      margin: 0;
+    }
+
+    .cover-note {
+      margin-top: 26px;
+      text-align: center;
+      color: #6a5234;
+      font-size: 19px;
+      line-height: 2;
+      font-weight: 800;
+    }
+
+    @media (max-width: 768px) {
+      .game-container {
+        padding: 16px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+
+      h2 {
+        font-size: 24px;
+      }
+
+      .cover-title {
+        font-size: 38px;
+      }
+
+      .cover-subtitle {
+        font-size: 22px;
+      }
+
+      .scene {
+        padding: 24px 18px 20px;
+        border-radius: 22px;
+      }
+
+      .scene p {
+        font-size: 18px;
+      }
+
+      .hint-box {
+        font-size: 18px;
+        padding: 16px;
+        border-radius: 16px;
+      }
+
+      .cover-card {
+        padding: 24px 20px;
+        border-radius: 20px;
+      }
+
+      .form-group label {
+        font-size: 18px;
+      }
+
+      .form-group input,
+      input {
+        font-size: 16px;
+        padding: 14px 16px;
+      }
+
+      .start-btn {
+        font-size: 18px;
+        padding: 15px 18px;
+      }
+
+      .cover-note {
+        font-size: 16px;
+      }
+
+      .options {
+        grid-template-columns: 1fr;
+      }
+    }
+
+
+    /* ===== 一頁式修正版：避免封面需要滑動捲軸 ===== */
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      min-height: 100vh;
+    }
+
+    .game-container {
+      height: 100vh;
+      max-width: min(1460px, 97vw);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(6px, 1.2vh, 12px) clamp(10px, 1.6vw, 18px);
+      overflow: hidden;
+    }
+
+    #game {
+      width: 100%;
+      max-height: 100%;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4.2vh, 44px);
+      line-height: 1.08;
+      margin-bottom: clamp(6px, 1vh, 12px);
+    }
+
+    h2 {
+      font-size: clamp(22px, 3vh, 30px);
+      line-height: 1.15;
+      margin-bottom: clamp(8px, 1.2vh, 14px);
+    }
+
+    .cover-title {
+      font-size: clamp(36px, 7vh, 58px);
+      line-height: 1;
+      margin-bottom: clamp(4px, 0.8vh, 8px);
+    }
+
+    .cover-subtitle {
+      font-size: clamp(22px, 3.6vh, 30px);
+      margin-top: clamp(4px, 0.8vh, 8px);
+      margin-bottom: clamp(10px, 1.6vh, 16px);
+      line-height: 1.1;
+    }
+
+    .scene {
+      width: min(100%, 1380px);
+      margin-top: clamp(8px, 1.2vh, 14px);
+      margin-left: auto;
+      margin-right: auto;
+      padding: clamp(18px, 2.8vh, 28px) clamp(28px, 3.2vw, 48px) clamp(14px, 2vh, 22px);
+      border-radius: clamp(22px, 3vw, 32px);
+    }
+
+    .scene p {
+      font-size: clamp(16px, 2.25vh, 21px);
+      line-height: 1.55;
+    }
+
+    .hint-box {
+      margin: clamp(12px, 2vh, 20px) auto clamp(14px, 2.2vh, 24px);
+      padding: clamp(12px, 1.9vh, 18px) clamp(16px, 2.4vw, 24px);
+      font-size: clamp(16px, 2.2vh, 21px);
+      line-height: 1.45;
+      border-radius: clamp(16px, 2vw, 22px);
+    }
+
+    .cover-card {
+      max-width: min(560px, 44vw);
+      padding: clamp(18px, 2.7vh, 26px) clamp(22px, 2.5vw, 30px);
+      border-radius: clamp(20px, 2.4vw, 26px);
+    }
+
+    .form-group {
+      margin-bottom: clamp(10px, 1.6vh, 16px);
+    }
+
+    .form-group label {
+      font-size: clamp(16px, 2vh, 19px);
+      margin-bottom: clamp(5px, 0.8vh, 8px);
+    }
+
+    .form-group input,
+    input {
+      font-size: clamp(15px, 1.9vh, 18px);
+      padding: clamp(11px, 1.6vh, 15px) clamp(14px, 2vw, 18px);
+      border-radius: clamp(12px, 1.7vw, 16px);
+    }
+
+    .start-btn {
+      font-size: clamp(17px, 2.3vh, 21px);
+      padding: clamp(12px, 1.8vh, 16px) clamp(18px, 2.5vw, 24px);
+      margin-top: clamp(8px, 1.2vh, 12px);
+      border-radius: clamp(14px, 1.8vw, 18px);
+    }
+
+    .cover-note {
+      margin-top: clamp(12px, 1.8vh, 18px);
+      font-size: clamp(14px, 1.85vh, 17px);
+      line-height: 1.6;
+    }
+
+    .small-text,
+    .tag {
+      font-size: clamp(13px, 1.7vh, 16px);
+    }
+
+    .progress {
+      margin: clamp(8px, 1.2vh, 14px) auto;
+      height: clamp(13px, 1.9vh, 18px);
+    }
+
+    .code-display {
+      font-size: clamp(15px, 2vh, 19px);
+      margin: clamp(6px, 1vh, 10px) 0 clamp(8px, 1.2vh, 12px);
+    }
+
+    .options {
+      gap: clamp(10px, 1.5vh, 16px);
+      margin-top: clamp(10px, 1.5vh, 16px);
+    }
+
+    button {
+      font-size: clamp(14px, 1.9vh, 17px);
+      padding: clamp(10px, 1.5vh, 14px) clamp(12px, 2vw, 18px);
+      border-radius: clamp(12px, 1.8vw, 16px);
+    }
+
+    .success,
+    .wrong {
+      font-size: clamp(16px, 2vh, 19px);
+      margin-top: clamp(8px, 1.2vh, 14px);
+    }
+
+    .report {
+      margin-top: clamp(8px, 1.2vh, 14px);
+      padding: clamp(16px, 2.2vh, 24px);
+      font-size: clamp(14px, 1.7vh, 17px);
+      line-height: 1.55;
+      max-height: 74vh;
+      overflow: hidden;
+    }
+
+    .wrong-list {
+      margin: clamp(8px, 1.2vh, 12px) 0;
+      padding: clamp(10px, 1.5vh, 14px);
+    }
+
+    .wrong-item {
+      margin-top: clamp(6px, 0.9vh, 9px);
+      padding-top: clamp(5px, 0.8vh, 8px);
+    }
+
+    @media (max-height: 760px) {
+      .cover-card {
+        max-width: min(540px, 44vw);
+      }
+
+      .scene {
+        padding-top: 18px;
+        padding-bottom: 14px;
+      }
+
+      .cover-note {
+        line-height: 1.45;
+      }
+    }
+
+    @media (max-width: 768px) {
+      html, body {
+        overflow: auto;
+      }
+
+      .game-container {
+        height: auto;
+        min-height: 100vh;
+        align-items: flex-start;
+      }
+
+      .cover-card {
+        max-width: 100%;
+      }
+    }
+
+
+    /* ===== 版面調整：關卡頁面縮短寬度、拉長高度 ===== */
+    .code-display,
+    .small-text {
+      color: #1f1f1f !important;
+      text-shadow: none !important;
+    }
+
+    h2 {
+      color: #fff4c9 !important;
+      text-shadow: 0 4px 14px rgba(0, 0, 0, 0.58) !important;
+    }
+
+    .progress {
+      max-width: min(980px, 82vw) !important;
+    }
+
+    .question-scene {
+      width: min(78vw, 1120px) !important;
+      min-height: clamp(420px, 48vh, 560px);
+      margin-left: auto !important;
+      margin-right: auto !important;
+      padding-left: clamp(36px, 4vw, 62px) !important;
+      padding-right: clamp(36px, 4vw, 62px) !important;
+      padding-top: clamp(34px, 4vh, 52px) !important;
+      padding-bottom: clamp(34px, 4vh, 52px) !important;
+    }
+
+    .question-scene .hint-box {
+      max-width: 100% !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    .question-scene .options {
+      width: 100%;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      gap: clamp(14px, 2vh, 22px) clamp(18px, 2vw, 28px);
+    }
+
+    .question-scene .option-btn {
+      width: 100%;
+    }
+
+    @media (min-width: 1200px) {
+      .game-container {
+        max-width: min(1320px, 92vw) !important;
+      }
+
+      .question-scene {
+        width: min(76vw, 1100px) !important;
+      }
+    }
+
+    @media (min-width: 1500px) {
+      .game-container {
+        max-width: 1360px !important;
+      }
+
+      .question-scene {
+        width: 1080px !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .question-scene {
+        width: 100% !important;
+        min-height: auto;
+      }
+    }
+
+
+    /* ===== 2026-05-28 修正：統一米黃色文字＋答案按鈕長寬自適應 ===== */
+    .code-display {
+      color: #fff4c9 !important;
+      opacity: 1 !important;
+      text-shadow: 0 4px 14px rgba(0, 0, 0, 0.58) !important;
+      font-weight: 900 !important;
+    }
+
+    .question-scene {
+      width: min(72vw, 1040px) !important;
+      min-height: clamp(460px, 54vh, 620px) !important;
+      padding-left: clamp(42px, 4.5vw, 68px) !important;
+      padding-right: clamp(42px, 4.5vw, 68px) !important;
+      padding-top: clamp(38px, 4.4vh, 58px) !important;
+      padding-bottom: clamp(44px, 5vh, 70px) !important;
+    }
+
+    .question-scene .options {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      justify-content: center !important;
+      align-items: stretch !important;
+      width: 100% !important;
+      max-width: 920px !important;
+      margin: clamp(22px, 3vh, 34px) auto 0 !important;
+      gap: clamp(18px, 2.4vh, 26px) clamp(24px, 3vw, 40px) !important;
+    }
+
+    .question-scene .option-btn {
+      width: auto !important;
+      flex: 0 1 clamp(300px, 42%, 430px) !important;
+      min-height: clamp(62px, 8vh, 82px) !important;
+      padding: clamp(15px, 2vh, 20px) clamp(24px, 3vw, 34px) !important;
+      white-space: normal !important;
+      word-break: keep-all !important;
+      line-height: 1.45 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+    }
+
+    @media (min-width: 1500px) {
+      .question-scene {
+        width: 1040px !important;
+      }
+
+      .question-scene .options {
+        max-width: 900px !important;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .question-scene {
+        width: 94vw !important;
+        min-height: auto !important;
+      }
+
+      .question-scene .option-btn {
+        flex-basis: 100% !important;
+        max-width: 100% !important;
+      }
+    }
+
+
+    /* ===== 2026-05-28 再修正：橘色答案框高度與下方留白 ===== */
+    .question-scene {
+      min-height: clamp(390px, 46vh, 520px) !important;
+      padding-top: clamp(34px, 4vh, 50px) !important;
+      padding-bottom: clamp(28px, 3.4vh, 44px) !important;
+    }
+
+    .question-scene .options {
+      margin-top: clamp(18px, 2.4vh, 26px) !important;
+      gap: clamp(16px, 2vh, 22px) clamp(24px, 3vw, 40px) !important;
+    }
+
+    .question-scene .option-btn {
+      min-height: clamp(72px, 8.5vh, 92px) !important;
+      padding-top: clamp(18px, 2.2vh, 24px) !important;
+      padding-bottom: clamp(18px, 2.2vh, 24px) !important;
+    }
+
+    @media (max-height: 760px) {
+      .question-scene {
+        min-height: clamp(360px, 48vh, 470px) !important;
+        padding-bottom: clamp(22px, 3vh, 34px) !important;
+      }
+
+      .question-scene .option-btn {
+        min-height: clamp(64px, 8vh, 80px) !important;
+      }
+    }
+
+
+
+    /* ===== 最後密碼輸入頁：加高輸入框與確認按鈕，背板同步加寬 ===== */
+    .final-door-scene {
+      width: min(94vw, 1500px);
+      padding: clamp(28px, 4vh, 44px) clamp(46px, 5vw, 78px) clamp(30px, 4vh, 46px);
+    }
+
+    .final-door-scene .hint-box {
+      max-width: none;
+      margin-bottom: clamp(24px, 3.4vh, 38px);
+      padding-top: clamp(18px, 2.5vh, 26px);
+      padding-bottom: clamp(18px, 2.5vh, 26px);
+    }
+
+    .final-code-input {
+      display: block;
+      width: 100%;
+      margin: clamp(22px, 3.2vh, 36px) auto clamp(22px, 3.2vh, 36px);
+      padding: clamp(22px, 3vh, 30px) clamp(22px, 3vw, 30px);
+      font-size: clamp(19px, 2.5vh, 24px);
+      border-radius: clamp(18px, 2.2vw, 24px);
+    }
+
+    .final-door-btn {
+      width: 100%;
+      padding-top: clamp(22px, 3vh, 30px);
+      padding-bottom: clamp(22px, 3vh, 30px);
+      font-size: clamp(20px, 2.8vh, 26px);
+      border-radius: clamp(18px, 2.2vw, 24px);
+      margin-top: 0;
+    }
+
+    @media (max-width: 768px) {
+      .final-door-scene {
+        width: 100%;
+        padding: 24px 18px 24px;
+      }
+    }
+
+
+    /* ===== 2026-05-28 修正：最後密碼頁只調上下高度，不拉寬左右 ===== */
+    .final-door-scene {
+      width: min(72vw, 1040px) !important;
+      min-height: clamp(420px, 50vh, 560px) !important;
+      padding: clamp(34px, 4.2vh, 52px) clamp(42px, 4.5vw, 68px) clamp(34px, 4.2vh, 52px) !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      border-radius: clamp(24px, 3vw, 34px) !important;
+    }
+
+    .final-door-scene .hint-box {
+      max-width: 100% !important;
+      margin-top: clamp(18px, 2.5vh, 28px) !important;
+      margin-bottom: clamp(28px, 3.8vh, 44px) !important;
+      padding-top: clamp(18px, 2.5vh, 26px) !important;
+      padding-bottom: clamp(18px, 2.5vh, 26px) !important;
+    }
+
+    .final-code-input {
+      width: 100% !important;
+      margin: clamp(26px, 3.8vh, 44px) auto clamp(24px, 3.4vh, 38px) !important;
+      padding-top: clamp(24px, 3.2vh, 34px) !important;
+      padding-bottom: clamp(24px, 3.2vh, 34px) !important;
+      padding-left: clamp(20px, 2.8vw, 30px) !important;
+      padding-right: clamp(20px, 2.8vw, 30px) !important;
+      font-size: clamp(19px, 2.5vh, 24px) !important;
+    }
+
+    .final-door-btn {
+      width: 100% !important;
+      padding-top: clamp(24px, 3.2vh, 34px) !important;
+      padding-bottom: clamp(24px, 3.2vh, 34px) !important;
+      font-size: clamp(20px, 2.8vh, 26px) !important;
+      margin-top: 0 !important;
+    }
+
+    @media (min-width: 1500px) {
+      .final-door-scene {
+        width: 1040px !important;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .final-door-scene {
+        width: 94vw !important;
+        min-height: auto !important;
+      }
+    }
+
+
+    .music-toggle {
+      position: fixed;
+      top: 18px;
+      right: 22px;
+      z-index: 9999;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 244, 201, 0.9);
+      background: rgba(48, 34, 16, 0.58);
+      color: #fff4c9;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(5px);
+      transition: 0.2s;
+      padding: 0;
+      margin: 0;
+    }
+
+    .music-toggle:hover {
+      transform: translateY(-2px);
+      background: rgba(83, 56, 24, 0.72);
+      filter: none;
+    }
+
+    .music-toggle.playing {
+      background: linear-gradient(135deg, #d58627, #efb547);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.95);
+    }
+
+    @media (max-width: 768px) {
+      .music-toggle {
+        width: 46px;
+        height: 46px;
+        top: 12px;
+        right: 12px;
+        font-size: 22px;
+      }
+    }
+
+
+
+    .exit-toggle {
+      position: fixed;
+      top: 18px;
+      left: 22px;
+      z-index: 9999;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 244, 201, 0.9);
+      background: rgba(48, 34, 16, 0.58);
+      color: #fff4c9;
+      font-size: 34px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(5px);
+      transition: 0.2s;
+      padding: 0 0 4px;
+      margin: 0;
+      font-weight: 300;
+    }
+
+    .exit-toggle:hover {
+      transform: translateY(-2px);
+      background: rgba(120, 38, 24, 0.75);
+      filter: none;
+    }
+
+    @media (max-width: 768px) {
+      .exit-toggle {
+        width: 46px;
+        height: 46px;
+        top: 12px;
+        left: 12px;
+        font-size: 30px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <button id="exitToggle" class="exit-toggle" onclick="endGame()" aria-label="結束遊戲" title="結束遊戲">×</button>
+  <button id="musicToggle" class="music-toggle" onclick="toggleMusic()" aria-label="播放背景音樂" title="播放／暫停背景音樂">🔇</button>
+  <audio id="bgMusic" src="audio/bg-music.mp3" loop preload="auto"></audio>
+
+  <div class="game-container">
+    <div id="game"></div>
+  </div>
+
+  <script>
+    const game = document.getElementById("game");
+
+    const bgMusic = document.getElementById("bgMusic");
+    const musicToggle = document.getElementById("musicToggle");
+    let isMusicPlaying = false;
+
+    async function toggleMusic() {
+      try {
+        if (isMusicPlaying) {
+          bgMusic.pause();
+          isMusicPlaying = false;
+          musicToggle.textContent = "🔇";
+          musicToggle.classList.remove("playing");
+          musicToggle.title = "播放背景音樂";
+        } else {
+          await bgMusic.play();
+          isMusicPlaying = true;
+          musicToggle.textContent = "🔊";
+          musicToggle.classList.add("playing");
+          musicToggle.title = "暫停背景音樂";
+        }
+      } catch (error) {
+        alert("目前找不到背景音樂檔，請確認 audio/bg-music.mp3 已經上傳。");
+      }
+    }
+
+
+    function endGame() {
+      const confirmEnd = confirm("確定要結束遊戲並回到封面嗎？目前的闖關進度會清除。");
+      if (!confirmEnd) return;
+
+      currentLevel = 0;
+      selectedLevels = [];
+      codePieces = [];
+      wrongCount = 0;
+      correctSubjects = [];
+      wrongRecords = [];
+      studentInfo = {
+        className: "",
+        seatNumber: "",
+        studentName: ""
+      };
+
+      showCover();
+    }
+
+    let currentLevel = 0;
+    let selectedLevels = [];
+    let codePieces = [];
+    let wrongCount = 0;
+    let correctSubjects = [];
+    let wrongRecords = [];
+
+    let studentInfo = {
+      className: "",
+      seatNumber: "",
+      studentName: ""
+    };
+
+    const questionBank = [
+      {
+        subject: "國語閱讀關",
+        subjectKey: "國語",
+        scene: "你在教室公布欄上發現一張被風吹落的紙條，上面似乎藏著第一個線索。",
+        questions: [
+          {
+            question: "紙條寫著：「真正的出口，不在門後，而在願意思考、合作與嘗試的人手中。」根據這段話，主角最需要做的是什麼？",
+            options: ["仔細整理線索並和同伴討論", "立刻用力推門看看能不能出去", "只注意門後有沒有鑰匙", "等別人來幫忙，不需要嘗試"],
+            answer: 0,
+            code: "2",
+            strategy: "先抓住句子中的關鍵詞「思考、合作、嘗試」，再判斷主角應該採取哪一種行動。"
+          },
+          {
+            question: "你讀到一句話：「他屏氣凝神地看著密碼鎖，生怕錯過任何一個提示。」根據上下文，「屏氣凝神」最可能表示什麼？",
+            options: ["非常專心地觀察", "非常生氣地說話", "快速地跑出教室", "故意不看任何線索"],
+            answer: 0,
+            code: "5",
+            strategy: "遇到不熟的詞語時，可以看前後文，例如「看著密碼鎖」和「生怕錯過提示」都表示很專心。"
+          },
+          {
+            question: "密室牆上寫著：「鑰匙像一道希望的光，照亮了黑暗的教室。」這句話主要把鑰匙比喻成什麼？",
+            options: ["能帶來希望的光", "真正會發亮的燈泡", "掛在牆上的裝飾", "讓教室變暗的原因"],
+            answer: 0,
+            code: "3",
+            strategy: "看到「像」通常可以先判斷是否為譬喻，再找出被比喻的事物和用來比喻的形象。"
+          },
+          {
+            question: "故事中，主角先觀察教室，再發現紙條，接著解開密碼。這樣的敘述安排主要是依照什麼順序？",
+            options: ["事件發生的先後順序", "人物年齡大小順序", "地點由遠到近順序", "物品價格高低順序"],
+            answer: 0,
+            code: "8",
+            strategy: "判斷文章順序時，可以注意「先、再、接著」這類時間線索。"
+          },
+          {
+            question: "你看到句子：「教室靜得連鉛筆滾落的聲音都聽得見。」這句話最主要想表現教室的哪一種氣氛？",
+            options: ["安靜又有點緊張", "熱鬧又歡樂", "吵雜又混亂", "明亮又溫暖"],
+            answer: 0,
+            code: "1",
+            strategy: "先抓住描寫重點「靜得連聲音都聽得見」，再判斷這句話營造出的氣氛。"
+          },
+          {
+            question: "故事寫道：「主角從桌上的灰塵、地上的刮痕和牆角的紙片中發現蛛絲馬跡。」根據上下文，「蛛絲馬跡」指的是什麼？",
+            options: ["細微但可能有用的線索", "已經完成的任務紀錄", "明顯寫在黑板上的答案", "和解謎無關的裝飾"],
+            answer: 0,
+            code: "6",
+            strategy: "遇到成語題時，可以把前後文中的例子一起看，灰塵、刮痕、紙片都是細小線索。"
+          },
+          {
+            question: "你讀完一段密室故事後，想知道主角為什麼會被困在教室裡。閱讀時應該優先找哪一類資訊？",
+            options: ["事件發生的原因", "每個字的筆畫數", "文章用了幾個逗號", "紙張的顏色深淺"],
+            answer: 0,
+            code: "4",
+            strategy: "題目問「為什麼」時，通常是在找原因，可以優先回到文章中找事件發生的前因。"
+          }
+        ]
+      },
+      {
+        subject: "數學密碼關",
+        subjectKey: "數學",
+        scene: "你來到黑板前，發現黑板上浮現一串任務資料。算出正確答案，才能取得下一個密碼碎片。",
+        questions: [
+          {
+            question: "密室書櫃共有 6 層，每層有 8 本線索書，其中 9 本被上鎖無法翻閱。若可翻閱的書本數量就是密碼線索，答案是多少？",
+            options: ["39 本", "48 本", "57 本", "31 本"],
+            answer: 0,
+            code: "7",
+            strategy: "先算全部書本數 6 × 8 = 48，再扣掉不能翻閱的 9 本，所以是 39 本。"
+          },
+          {
+            question: "小偵探沿著校園走廊前進，2 分鐘走了 120 公尺。若速度保持不變，每分鐘走幾公尺？",
+            options: ["40 公尺", "50 公尺", "60 公尺", "80 公尺"],
+            answer: 2,
+            code: "9",
+            strategy: "先找出總距離和總時間，再用 120 ÷ 2，算出每分鐘走 60 公尺。"
+          },
+          {
+            question: "密室地板有一塊長方形地毯，長 12 公分、寬 5 公分。地毯面積對應下一個密碼提示，面積是多少？",
+            options: ["17 平方公分", "34 平方公分", "60 平方公分", "120 平方公分"],
+            answer: 2,
+            code: "6",
+            strategy: "長方形面積是長 × 寬，所以用 12 × 5 = 60 平方公分。"
+          },
+          {
+            question: "密室任務卡寫著：30 張線索卡中，有 3/5 是真正有用的線索。請問有用的線索卡有幾張？",
+            options: ["12 張", "15 張", "18 張", "20 張"],
+            answer: 2,
+            code: "1",
+            strategy: "先把 30 張分成 5 等分，每份是 6 張，再取其中 3 份，6 × 3 = 18 張。"
+          },
+          {
+            question: "校園合作社的解謎道具原價 500 元，今天打八折。若折扣後價格是提示數字，應該是多少元？",
+            options: ["350 元", "400 元", "450 元", "480 元"],
+            answer: 1,
+            code: "8",
+            strategy: "八折表示原價的 80%，所以用 500 × 0.8 = 400 元。"
+          },
+          {
+            question: "小偵探在五次解謎訓練中的分數是 80、90、70、85、75。若平均分數代表通關能力值，平均是多少？",
+            options: ["78 分", "80 分", "82 分", "85 分"],
+            answer: 1,
+            code: "3",
+            strategy: "平均數要先加總再除以次數，80＋90＋70＋85＋75 = 400，400 ÷ 5 = 80。"
+          },
+          {
+            question: "逃脫門距離安全出口 120 公尺，機器人每分鐘前進 60 公尺。若速度固定，機器人幾分鐘後會到達出口？",
+            options: ["1 分鐘", "2 分鐘", "3 分鐘", "4 分鐘"],
+            answer: 1,
+            code: "4",
+            strategy: "先找出距離和每分鐘前進的距離，再用 120 ÷ 60 = 2 分鐘。"
+          }
+        ]
+      },
+      {
+        subject: "社會地圖關",
+        subjectKey: "社會",
+        scene: "你打開教室角落的地圖櫃，裡面有一張校園平面圖。你必須正確判斷地圖資訊，才能找到暗格。",
+        questions: [
+          {
+            question: "你在校園地圖上看到一個「藍色水滴」符號，但不知道它代表飲水機、洗手台，還是水池。這時候要先看地圖旁邊哪一個說明，才能知道符號代表什麼？",
+            options: ["圖例", "比例尺", "指北針", "地圖方向"],
+            answer: 0,
+            code: "4",
+            strategy: "遇到不懂的地圖符號時，先看圖例，因為圖例是用來說明符號、顏色或線條代表的意思。"
+          },
+          {
+            question: "任務提示寫著：「從圖書館往北走，再往東轉。」如果你不確定北方在哪裡，最應該先查看地圖上的哪個資訊？",
+            options: ["指北針", "比例尺", "圖例", "行政區界線"],
+            answer: 0,
+            code: "6",
+            strategy: "題目重點是判斷方向，所以要先找指北針，確認北方的位置。"
+          },
+          {
+            question: "你想知道從教室到健康中心的實際距離，地圖上哪一項資訊最有幫助？",
+            options: ["比例尺", "圖例", "指北針", "地圖標題"],
+            answer: 0,
+            code: "2",
+            strategy: "題目問實際距離時，要看比例尺，因為比例尺可以把地圖距離換算成實際距離。"
+          },
+          {
+            question: "校園地圖上標示：圖書館在操場的西方。若你現在站在操場，要走到圖書館，應往哪個方向走？",
+            options: ["西方", "東方", "北方", "南方"],
+            answer: 0,
+            code: "8",
+            strategy: "先確認題目中的位置關係：「圖書館在操場的西方」，所以從操場出發要往西走。"
+          },
+          {
+            question: "你看到逃生路線圖上有兩條路線，一條較短但經過施工區，另一條較長但避開危險區。若以安全為優先，應選擇哪一條？",
+            options: ["較長但避開危險區的路線", "較短但經過施工區的路線", "離自己最近但沒有標示的路線", "跟著人多的方向走，不看地圖"],
+            answer: 0,
+            code: "5",
+            strategy: "逃生路線判斷要把安全放在優先順序，不能只看距離短不短。"
+          },
+          {
+            question: "地圖標示健康中心在教室的東北方。若你從教室出發，應往哪個方向移動最合理？",
+            options: ["往東再往北", "往西再往南", "只往南", "只往西"],
+            answer: 0,
+            code: "9",
+            strategy: "東北方是由東方和北方組成，因此可以理解成往東再往北的方向。"
+          },
+          {
+            question: "任務要求你找到「最近的安全集合地點」。你手上有校園平面圖，最應該比較哪些資訊？",
+            options: ["集合地點的位置與路線距離", "地圖紙張大小與顏色", "地圖作者與出版日期", "教室門牌字體大小"],
+            answer: 0,
+            code: "1",
+            strategy: "題目要找最近且安全的集合地點，所以要比較集合地點位置和可走路線距離。"
+          }
+        ]
+      },
+      {
+        subject: "自然實驗關",
+        subjectKey: "自然",
+        scene: "教室裡的自然實驗桌突然亮起藍光，桌上有水杯、燈泡、磁鐵和植物模型。",
+        questions: [
+          {
+            question: "密室中的玻璃杯裝著熱水，杯口上方出現白白的霧氣，過一會兒杯蓋內側出現小水珠。這個現象最能說明什麼？",
+            options: ["水蒸氣遇冷後凝結成小水珠", "水遇冷後直接變成冰塊", "空氣中的灰塵變成水", "杯子本身產生新的液體"],
+            answer: 0,
+            code: "9",
+            strategy: "先判斷現象：熱水產生水蒸氣，水蒸氣遇到較冷的杯蓋後會凝結成小水珠。"
+          },
+          {
+            question: "你看到植物模型旁的提示：「我需要陽光和水，也會吸收空氣中的某種氣體來製造養分。」這種氣體最可能是什麼？",
+            options: ["二氧化碳", "氧氣", "氮氣", "水蒸氣"],
+            answer: 0,
+            code: "3",
+            strategy: "看到「植物製造養分」可以聯想到光合作用，植物會吸收二氧化碳並釋放氧氣。"
+          },
+          {
+            question: "桌上有塑膠尺、鐵釘、木筷和橡皮擦。若要測試磁鐵的吸引能力，哪一個物品最可能被磁鐵吸起？",
+            options: ["鐵釘", "塑膠尺", "木筷", "橡皮擦"],
+            answer: 0,
+            code: "5",
+            strategy: "磁鐵通常能吸引鐵製物品，因此可以先找選項中和鐵有關的物品。"
+          },
+          {
+            question: "你把電池、電線和小燈泡接在一起，但燈泡沒有亮。若要讓燈泡亮起，最需要檢查哪一件事？",
+            options: ["電路是否形成完整通路", "桌子的顏色是否太暗", "燈泡旁邊是否有磁鐵", "電線是否放得很整齊"],
+            answer: 0,
+            code: "7",
+            strategy: "小燈泡要亮，需要電流通過完整電路，所以要先檢查電路是否接成通路。"
+          },
+          {
+            question: "密室螢幕顯示月亮的照片，旁邊問：「為什麼晚上能看到月亮？」最合理的解釋是什麼？",
+            options: ["月亮反射太陽光", "月亮自己像太陽一樣發光", "月亮吸收地球的燈光", "月亮只有晚上才存在"],
+            answer: 0,
+            code: "2",
+            strategy: "月亮本身不會像太陽一樣發光，我們看到月亮主要是因為月亮反射太陽光。"
+          },
+          {
+            question: "你敲了一下金屬管，另一端的同學也聽到聲音。這表示聲音的傳播需要什麼條件？",
+            options: ["需要介質傳遞", "一定只能在真空中傳播", "必須沒有空氣", "只能靠光線傳播"],
+            answer: 0,
+            code: "8",
+            strategy: "聲音需要透過介質傳播，介質可以是空氣、液體或固體，金屬管也能傳聲。"
+          },
+          {
+            question: "密室中有四樣物品：寶特瓶、用過的衛生紙、廚餘湯汁、灰塵。若要進行資源回收，哪一項最適合放入回收桶？",
+            options: ["寶特瓶", "用過的衛生紙", "廚餘湯汁", "灰塵"],
+            answer: 0,
+            code: "6",
+            strategy: "先判斷哪些物品可以回收再利用，寶特瓶通常屬於可回收資源。"
+          }
+        ]
+      },
+      {
+        subject: "英文線索關",
+        subjectKey: "英文",
+        scene: "你在講桌上找到一張英文提示卡，卡片上的句子似乎指出鑰匙藏在哪裡。",
+        questions: [
+          {
+            question: "You see a note: “The key is under the book.” Where is the key?",
+            options: ["Under the book", "Behind the door", "Next to the clock", "On the chair"],
+            answer: 0,
+            code: "1",
+            strategy: "先抓住關鍵句 “The key is under the book.”，其中 under 表示在下面，所以鑰匙在書本下面。"
+          },
+          {
+            question: "The screen says: “Do not open the box on the desk. Open the box under the chair.” Which box should you open?",
+            options: ["The box under the chair", "The box on the desk", "The box next to the door", "The box in the bag"],
+            answer: 0,
+            code: "4",
+            strategy: "先注意 “Do not open” 表示不要打開桌上的盒子，再看下一句 “Open the box under the chair”。"
+          },
+          {
+            question: "You read: “The key is next to the clock, not under the desk.” Where is the key?",
+            options: ["Beside the clock", "Under the desk", "Inside the bag", "Behind the door"],
+            answer: 0,
+            code: "6",
+            strategy: "先看肯定線索 “next to the clock”，再注意 “not under the desk” 是否定線索。"
+          },
+          {
+            question: "The note says: “Look at the clock on the wall. The number near it is important.” Which place should you check?",
+            options: ["The wall clock", "The table drawer", "The classroom door", "The school bag"],
+            answer: 0,
+            code: "8",
+            strategy: "先找出句中的物品和位置，clock on the wall 表示牆上的時鐘，所以要檢查 wall clock。"
+          },
+          {
+            question: "Your teammate says, “Help me, please.” What does your teammate want you to do?",
+            options: ["Give help", "Say goodbye", "Close the door", "Read quietly"],
+            answer: 0,
+            code: "2",
+            strategy: "看到 “Help me, please.” 可以判斷對方是在請求幫忙，所以要選 Give help。"
+          },
+          {
+            question: "You find a card: “The box is next to the desk.” Which location matches the sentence?",
+            options: ["Beside the desk", "Under the desk", "Outside the classroom", "Behind the window"],
+            answer: 0,
+            code: "7",
+            strategy: "next to 和 beside 都有「在旁邊」的意思，所以要找和 desk 旁邊相符的選項。"
+          },
+          {
+            question: "The computer shows: “Where is the key?” Which answer is the best response?",
+            options: ["It is in the drawer.", "This is a book.", "Thank you.", "I am ten years old."],
+            answer: 0,
+            code: "5",
+            strategy: "Where 是問地點，所以回答時要選能說明位置的句子，例如 It is in the drawer."
+          }
+        ]
+      },
+      {
+        subject: "跨領域素養關",
+        subjectKey: "素養",
+        scene: "你終於來到最後一道門前。門上的螢幕顯示：『請整合不同線索，冷靜思考，並做出最合理的判斷。』",
+        questions: [
+          {
+            question: "你發現逃脫門需要輸入密碼，但線索分散在文章、地圖和算式中。若要避免漏掉重要資訊，最適合的做法是什麼？",
+            options: ["先整理線索，再找出它們之間的關聯", "先猜一組看起來順眼的密碼", "只看自己最擅長的那一題", "等系統自動給答案"],
+            answer: 0,
+            code: "0",
+            strategy: "遇到多種線索時，先整理資訊，再判斷哪些線索彼此有關，避免只憑直覺猜答案。"
+          },
+          {
+            question: "題目同時出現文字敘述、數字資料和地圖位置。若要有效解題，最應該先做哪件事？",
+            options: ["圈出關鍵資訊並判斷哪些資料有用", "只選最長的選項", "忽略文字，只看圖片顏色", "直接跳到最後一題"],
+            answer: 0,
+            code: "7",
+            strategy: "先圈出關鍵字、數字和位置資訊，再判斷哪些資料和任務最有關。"
+          },
+          {
+            question: "密室提示寫著：「打開燈才能看清地圖，但離開前請節約能源。」你完成任務後，最合適的行動是什麼？",
+            options: ["確認不再需要照明後關燈", "把所有燈都一直打開", "拔掉所有電線再離開", "不管燈是否還開著"],
+            answer: 0,
+            code: "5",
+            strategy: "題目同時提到完成任務和節約能源，應選擇既安全又能避免浪費的做法。"
+          },
+          {
+            question: "密室中出現校園逃生圖，提示你發生緊急狀況時要到集合地點。最安全的做法是什麼？",
+            options: ["依照逃生路線並聽從老師指示", "自己找最近的小門衝出去", "回教室拿東西再離開", "躲起來等別人找你"],
+            answer: 0,
+            code: "9",
+            strategy: "安全情境中要優先依照逃生路線和老師指示，不要自行亂跑或回去拿物品。"
+          },
+          {
+            question: "小組成員對答案有不同看法，一位同學認為要看地圖，另一位同學認為要先算數學。最適合的合作方式是什麼？",
+            options: ["各自說明理由，再一起判斷哪個線索最關鍵", "只聽成績最好的同學，不需要討論", "大家同時亂猜不同答案", "停止合作，各做各的"],
+            answer: 0,
+            code: "3",
+            strategy: "遇到不同意見時，先聽彼此理由，再依照線索判斷，不要只聽單一意見或各自猜測。"
+          },
+          {
+            question: "你第一次解題失敗，心裡有點急，系統提示：「請重新檢查線索。」最符合良好學習態度的做法是什麼？",
+            options: ["先讓自己冷靜，再回頭檢查錯誤並重新嘗試", "立刻放棄遊戲", "責怪同學害你答錯", "不看題目直接再猜一次"],
+            answer: 0,
+            code: "6",
+            strategy: "答錯時先穩定情緒，再回頭檢查題目線索，會比直接亂猜更有效。"
+          },
+          {
+            question: "你要向同學說明為什麼選這個答案，最清楚的表達方式是什麼？",
+            options: ["說明線索、推理過程和選擇理由", "只說答案，不解釋原因", "說因為我覺得很像", "把所有選項念一次就好"],
+            answer: 0,
+            code: "8",
+            strategy: "說明答案時，最好包含線索、推理過程和選擇理由，讓同學知道你是怎麼判斷的。"
+          }
+        ]
+      }
+    ];
+
+    function showCover() {
+      game.innerHTML = `
+        <h1 class="cover-title">校園密室逃脫</h1>
+        <div class="cover-subtitle">消失的鑰匙</div>
+
+        <div class="scene">
+          <p>
+            放學後，你和同學正在整理教室，突然聽見「喀！」的一聲，
+            教室門竟然自動上鎖了。
+          </p>
+
+          <div class="hint-box">
+            你必須完成六道跨領域任務，蒐集密碼碎片，找回消失的鑰匙。
+          </div>
+
+          <div class="cover-card">
+            <div class="form-group">
+              <label for="className">班級</label>
+              <input id="className" type="text" placeholder="例如：201">
+            </div>
+
+            <div class="form-group">
+              <label for="seatNumber">座號</label>
+              <input id="seatNumber" type="text" placeholder="例如：12">
+            </div>
+
+            <div class="form-group">
+              <label for="studentName">姓名</label>
+              <input id="studentName" type="text" placeholder="請輸入姓名">
+            </div>
+
+            <button class="start-btn" onclick="saveStudentInfo()">進入任務說明</button>
+
+            <div id="coverFeedback"></div>
+          </div>
+
+          <div class="cover-note">
+            任務領域：國語、數學、社會、自然、英文、跨領域素養。<br>
+            每一關都會隨機抽題，答對後可獲得密碼碎片。
+          </div>
+        </div>
+      `;
+    }
+
+    function saveStudentInfo() {
+      const className = document.getElementById("className").value.trim();
+      const seatNumber = document.getElementById("seatNumber").value.trim();
+      const studentName = document.getElementById("studentName").value.trim();
+      const coverFeedback = document.getElementById("coverFeedback");
+
+      if (!className || !seatNumber || !studentName) {
+        coverFeedback.innerHTML = `
+          <div class="wrong">
+            請先填寫班級、座號和姓名，再開始任務。
+          </div>
+        `;
+        return;
+      }
+
+      studentInfo = {
+        className,
+        seatNumber,
+        studentName
+      };
+
+      showStart();
+    }
+
+    function showStart() {
+      game.innerHTML = `
+        <h1>校園密室逃脫：消失的鑰匙</h1>
+        <div class="scene">
+          <p>
+            黑板上慢慢浮現一行字：
+          </p>
+          <div class="hint-box">
+            「消失的鑰匙藏在六道任務之中。完成國語、數學、社會、自然、英文與素養挑戰，
+            蒐集六個密碼碎片，才能打開逃脫門。」
+          </div>
+          <p>
+            ${studentInfo.studentName} 小偵探，你必須運用五、六年級所學的知識，
+            解開跨領域謎題，找回消失的鑰匙。
+          </p>
+        </div>
+
+        <div style="text-align:center;">
+          <span class="tag">國語</span>
+          <span class="tag">數學</span>
+          <span class="tag">社會</span>
+          <span class="tag">自然</span>
+          <span class="tag">英文</span>
+          <span class="tag">素養題</span>
+        </div>
+
+        <p class="small-text">每一關都會從題庫中隨機抽出 1 題。</p>
+        <button class="start-btn" onclick="startGame()">開始逃脫任務</button>
+      `;
+    }
+
+    function startGame() {
+      currentLevel = 0;
+      selectedLevels = [];
+      codePieces = [];
+      wrongCount = 0;
+      correctSubjects = [];
+      wrongRecords = [];
+
+      questionBank.forEach(subject => {
+        const randomIndex = Math.floor(Math.random() * subject.questions.length);
+        const selectedQuestion = subject.questions[randomIndex];
+
+        const shuffledOptions = selectedQuestion.options
+          .map((option, optionIndex) => ({
+            option,
+            originalIndex: optionIndex
+          }))
+          .sort(() => Math.random() - 0.5);
+
+        const newAnswerIndex = shuffledOptions.findIndex(
+          item => item.originalIndex === selectedQuestion.answer
+        );
+
+        selectedLevels.push({
+          subject: subject.subject,
+          subjectKey: subject.subjectKey,
+          scene: subject.scene,
+          ...selectedQuestion,
+          options: shuffledOptions.map(item => item.option),
+          answer: newAnswerIndex,
+          hasRecordedWrong: false
+        });
+      });
+
+      showLevel();
+    }
+
+    function updateProgress() {
+      const percent = (currentLevel / selectedLevels.length) * 100;
+      return `
+        <div class="progress">
+          <div class="progress-bar" style="width:${percent}%"></div>
+        </div>
+        <div class="code-display">
+          目前取得的密碼碎片：${codePieces.length > 0 ? codePieces.join(" - ") : "尚未取得"}
+        </div>
+      `;
+    }
+
+    function showLevel() {
+      const level = selectedLevels[currentLevel];
+
+      game.innerHTML = `
+        <h1>校園密室逃脫：消失的鑰匙</h1>
+        ${updateProgress()}
+        <h2>第 ${currentLevel + 1} 關：${level.subject}</h2>
+
+        <div class="scene question-scene">
+          <p>${level.scene}</p>
+          <div class="hint-box">${level.question}</div>
+
+          <div class="options">
+            ${level.options.map((option, index) => `
+              <button class="option-btn" onclick="checkAnswer(${index})">${option}</button>
+            `).join("")}
+          </div>
+
+          <div id="feedback"></div>
+        </div>
+      `;
+    }
+
+    function checkAnswer(index) {
+      const level = selectedLevels[currentLevel];
+      const feedback = document.getElementById("feedback");
+      const buttons = document.querySelectorAll(".option-btn");
+
+      if (index === level.answer) {
+        buttons.forEach(btn => btn.disabled = true);
+
+        codePieces.push(level.code);
+        correctSubjects.push(level.subjectKey);
+
+        feedback.innerHTML = `
+          <div class="success">
+            答對了！你取得密碼碎片：${level.code}
+          </div>
+          <button class="start-btn" onclick="nextLevel()">前往下一關</button>
+        `;
+      } else {
+        wrongCount++;
+
+        if (!level.hasRecordedWrong) {
+          wrongRecords.push({
+            subject: level.subjectKey,
+            question: level.question,
+            strategy: level.strategy || "建議先圈出題目關鍵字，再依照線索一步一步判斷。"
+          });
+          level.hasRecordedWrong = true;
+        }
+
+        feedback.innerHTML = `
+          <div class="wrong">
+            這個答案不太對，請再觀察題目中的線索。
+          </div>
+        `;
+      }
+    }
+
+    function nextLevel() {
+      currentLevel++;
+
+      if (currentLevel < selectedLevels.length) {
+        showLevel();
+      } else {
+        showFinalDoor();
+      }
+    }
+
+    function showFinalDoor() {
+      game.innerHTML = `
+        <h1>最後逃脫門</h1>
+        ${updateProgress()}
+
+        <div class="scene final-door-scene">
+          <p>
+            你已經完成六道跨領域任務，現在來到最後一扇門前。
+            門上的密碼鎖需要輸入六位數密碼。
+          </p>
+
+          <div class="hint-box">
+            請依照你取得密碼碎片的順序，輸入六位數逃脫密碼。
+          </div>
+
+          <input id="finalCode" class="final-code-input" type="text" placeholder="請輸入六位數密碼">
+
+          <button class="start-btn final-door-btn" onclick="checkFinalCode()">確認開門</button>
+
+          <div id="finalFeedback"></div>
+        </div>
+      `;
+    }
+
+    function checkFinalCode() {
+      const input = document.getElementById("finalCode").value.trim();
+      const answer = codePieces.join("");
+      const finalFeedback = document.getElementById("finalFeedback");
+
+      if (input === answer) {
+        showReport();
+      } else {
+        finalFeedback.innerHTML = `
+          <div class="wrong">
+            密碼錯誤！請依照畫面上顯示的密碼碎片順序輸入，不要自行重新排列。
+          </div>
+        `;
+      }
+    }
+
+    function showReport() {
+      const report = generateReport();
+      const wrongReview = generateWrongReview();
+
+      game.innerHTML = `
+        <h1>成功逃脫！</h1>
+
+        <div class="scene">
+          <p class="success">恭喜你找回消失的鑰匙，成功逃出神祕教室！</p>
+
+          <div class="report">
+            <h2>小偵探任務報告</h2>
+
+            <div class="student-card">
+              班級：${studentInfo.className}　
+              座號：${studentInfo.seatNumber}　
+              姓名：${studentInfo.studentName}
+            </div>
+
+            ${wrongReview}
+            <p>${report}</p>
+          </div>
+
+          <button class="start-btn" onclick="showCover()">重新挑戰</button>
+        </div>
+      `;
+    }
+
+    function generateWrongReview() {
+      if (wrongRecords.length === 0) {
+        return `
+          <div class="wrong-list" style="background:#dcfce7; color:#14532d; border-left-color:#16a34a;">
+            本次挑戰沒有答錯的題目，表現很穩定！
+          </div>
+        `;
+      }
+
+      const wrongText = wrongRecords.map(record => {
+        return `
+          <div class="wrong-item">
+            ${record.subject}：「${record.question}」
+            <span class="strategy">答題策略：${record.strategy}</span>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div class="wrong-list">
+          本次可以再複習的地方：
+          ${wrongText}
+        </div>
+      `;
+    }
+
+    function generateReport() {
+      let subjectText = correctSubjects.join("、");
+
+      let comment = "";
+
+      if (wrongCount === 0) {
+        comment = "你在整個任務中表現非常穩定，能快速理解題意並做出正確判斷。";
+      } else if (wrongCount <= 3) {
+        comment = "你在任務中雖然遇到一些小挑戰，但能持續嘗試並修正答案，展現良好的解題態度。";
+      } else {
+        comment = "你在任務中遇到較多困難，但仍然完成挑戰。建議之後可以先圈出題目關鍵字，再一步一步推理。";
+      }
+
+      return `
+        親愛的 ${studentInfo.studentName} 小偵探你好，你成功完成了「校園密室逃脫：消失的鑰匙」任務。
+        這次任務中，你完成了 ${subjectText} 等跨領域挑戰。
+        ${comment}
+        整體來說，你能運用不同學科的知識解決問題，也能在挑戰中練習冷靜思考與合作溝通，是一位具有觀察力、思考力與學習毅力的小偵探！
+      `;
+    }
+
+    showCover();
+  </script>
+</body>
+</html>
