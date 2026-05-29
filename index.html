@@ -961,12 +961,17 @@
       const confirmEnd = confirm("確定要結束遊戲並回到封面嗎？目前的闖關進度會清除。");
       if (!confirmEnd) return;
 
+      postLog("game_ended_by_user", {
+        reason: "使用者點擊左上角結束鍵"
+      });
+
       currentLevel = 0;
       selectedLevels = [];
       codePieces = [];
       wrongCount = 0;
       correctSubjects = [];
       wrongRecords = [];
+      answerRecords = [];
       studentInfo = {
         className: "",
         seatNumber: "",
@@ -982,12 +987,43 @@
     let wrongCount = 0;
     let correctSubjects = [];
     let wrongRecords = [];
+    let answerRecords = [];
 
     let studentInfo = {
       className: "",
       seatNumber: "",
       studentName: ""
     };
+
+    function getProgressSnapshot() {
+      return {
+        currentLevel,
+        totalLevels: selectedLevels.length,
+        codePieces,
+        wrongCount,
+        correctSubjects,
+        wrongRecords,
+        answerRecords
+      };
+    }
+
+    async function postLog(action, extraData = {}) {
+      try {
+        await fetch("/api/log", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action,
+            studentInfo,
+            progress: getProgressSnapshot(),
+            extraData,
+            createdAt: new Date().toISOString()
+          })
+        });
+      } catch (error) {
+        console.warn("log failed", error);
+      }
+    }
 
     const questionBank = [
       {
@@ -1393,6 +1429,10 @@
         studentName
       };
 
+      postLog("student_entered", {
+        message: "學生完成封面基本資料填寫"
+      });
+
       showStart();
     }
 
@@ -1461,6 +1501,16 @@
         });
       });
 
+      postLog("game_started", {
+        selectedSubjects: selectedLevels.map(level => level.subjectKey),
+        selectedQuestions: selectedLevels.map((level, index) => ({
+          level: index + 1,
+          subject: level.subjectKey,
+          question: level.question,
+          code: level.code
+        }))
+      });
+
       showLevel();
     }
 
@@ -1504,7 +1554,11 @@
       const feedback = document.getElementById("feedback");
       const buttons = document.querySelectorAll(".option-btn");
 
-      if (index === level.answer) {
+      const isCorrect = index === level.answer;
+      const selectedAnswer = level.options[index];
+      const correctAnswer = level.options[level.answer];
+
+      if (isCorrect) {
         buttons.forEach(btn => btn.disabled = true);
 
         codePieces.push(level.code);
@@ -1534,9 +1588,32 @@
           </div>
         `;
       }
+
+      const answerRecord = {
+        level: currentLevel + 1,
+        subject: level.subjectKey,
+        subjectName: level.subject,
+        question: level.question,
+        selectedAnswer,
+        correctAnswer,
+        isCorrect,
+        codePiece: isCorrect ? level.code : "",
+        codePieces: [...codePieces],
+        wrongCount,
+        answeredAt: new Date().toISOString()
+      };
+
+      answerRecords.push(answerRecord);
+      postLog("answer_submitted", answerRecord);
     }
 
     function nextLevel() {
+      postLog("level_completed", {
+        completedLevel: currentLevel + 1,
+        completedSubject: selectedLevels[currentLevel]?.subjectKey || "",
+        codePieces: [...codePieces]
+      });
+
       currentLevel++;
 
       if (currentLevel < selectedLevels.length) {
@@ -1575,6 +1652,12 @@
       const answer = codePieces.join("");
       const finalFeedback = document.getElementById("finalFeedback");
 
+      postLog("final_code_submitted", {
+        input,
+        answer,
+        isCorrect: input === answer
+      });
+
       if (input === answer) {
         showReport();
       } else {
@@ -1589,6 +1672,13 @@
     function showReport() {
       const report = generateReport();
       const wrongReview = generateWrongReview();
+
+      postLog("game_completed", {
+        report,
+        finalCode: codePieces.join(""),
+        totalWrongCount: wrongCount,
+        answerRecords
+      });
 
       game.innerHTML = `
         <h1>成功逃脫！</h1>

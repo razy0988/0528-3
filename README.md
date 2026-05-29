@@ -1,40 +1,53 @@
 # 校園密室逃脫｜消失的鑰匙
 
-這是一個可直接上傳到 GitHub / Vercel 的版本，已包含背景圖片、Vercel 設定與 API。
+這是完整可上傳 GitHub / Vercel 的版本，已包含：
+
+- index.html：主遊戲網頁
+- images/classroom-bg.png：背景圖
+- audio/bg-music.mp3：背景音樂
+- api/log.js：將前端紀錄轉送到 Google Apps Script
+- api/feedback.js：AI 回饋 API（可選）
+- google_apps_script/Code.gs：Google Apps Script 試算表接收程式
+- vercel.json：Vercel 設定
 
 ## 檔案結構
 
 ```text
-campus_escape_room/
+campus_escape_room_complete/
 ├─ index.html
 ├─ README.md
 ├─ vercel.json
 ├─ api/
 │  ├─ feedback.js
 │  └─ log.js
-└─ images/
-   └─ classroom-bg.png
+├─ images/
+│  └─ classroom-bg.png
+├─ audio/
+│  └─ bg-music.mp3
+└─ google_apps_script/
+   └─ Code.gs
 ```
 
-## Vercel Environment Variables
+## 讓資料寫入 Google 試算表
 
-如果要使用 AI 回饋，請在 Vercel 設定：
-
-```text
-AI_KEY=你的 OpenRouter API Key
-```
-
-如果要寫入 Google 試算表，請另外設定：
+1. 建立 Google 試算表，複製試算表 URL。
+2. 到 Google Apps Script，貼上 `google_apps_script/Code.gs`。
+3. 把 Code.gs 內的 `SPREADSHEET_URL` 換成你的試算表 URL。
+4. 部署為「網頁應用程式」。
+5. 權限設定：
+   - 執行身分：我
+   - 誰可以存取：任何人
+6. 複製 Web App URL。
+7. 到 Vercel → Project → Settings → Environment Variables 加入：
 
 ```text
 GAS_URL=你的 Google Apps Script Web App URL
 ```
 
-若沒有設定 `AI_KEY` 或 `GAS_URL`，網頁仍可開啟，只是 AI 回饋或試算表寫入會使用備用模式。
+## AI 回饋（可選）
 
-## 使用方式
+若要使用 AI 回饋，到 Vercel Environment Variables 加入：
 
-1. 將整個資料夾內的檔案上傳到 GitHub。
-2. 到 Vercel 匯入這個 GitHub 專案。
-3. 需要 AI 回饋時，到 Vercel 的 Environment Variables 加入 `AI_KEY`。
-4. 需要寫入試算表時，到 Vercel 的 Environment Variables 加入 `GAS_URL`。
+```text
+AI_KEY=你的 OpenRouter API Key
+```
