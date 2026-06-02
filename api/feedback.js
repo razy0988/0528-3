@@ -50,7 +50,7 @@ ${JSON.stringify(answers, null, 2)}
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "openrouter/free",
+        model: "openai/gpt-oss-120b:free",
         messages: [
           { role: "system", content: "你是一位親切、具鼓勵性的國小老師。" },
           { role: "user", content: prompt }
