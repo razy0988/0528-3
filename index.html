@@ -917,6 +917,35 @@
       }
     }
 
+
+
+    /* ===== AI 小偵探任務報告：保留原背景與音樂版 ===== */
+    .ai-report-box {
+      background: #fffaf0;
+      border: 2px solid #d8a947;
+      border-radius: 18px;
+      padding: 18px 20px;
+      margin: 16px 0;
+      color: #4a3720;
+      line-height: 1.9;
+      font-weight: 700;
+      white-space: pre-wrap;
+      text-align: left;
+    }
+
+    .ai-report-box.loading {
+      color: #7a4c13;
+      background: #fff3cf;
+    }
+
+    .ai-report-note {
+      font-size: 15px;
+      color: #7a4c13;
+      margin-top: 8px;
+      font-weight: 700;
+      text-align: left;
+    }
+
   </style>
 </head>
 
@@ -1670,11 +1699,11 @@
     }
 
     function showReport() {
-      const report = generateReport();
+      const fallbackReport = generateReport();
       const wrongReview = generateWrongReview();
 
       postLog("game_completed", {
-        report,
+        report: fallbackReport,
         finalCode: codePieces.join(""),
         totalWrongCount: wrongCount,
         answerRecords
@@ -1696,12 +1725,115 @@
             </div>
 
             ${wrongReview}
-            <p>${report}</p>
+
+            <div id="aiReportText" class="ai-report-box loading">
+              AI 正在根據你的闖關表現產生專屬任務報告，請稍候……
+            </div>
+            <div id="aiReportNote" class="ai-report-note"></div>
           </div>
 
           <button class="start-btn" onclick="showCover()">重新挑戰</button>
         </div>
       `;
+
+      loadAiMissionReport(fallbackReport);
+    }
+
+    function buildPerformanceSummary() {
+      const totalAttempts = answerRecords.length;
+      const correctAttempts = answerRecords.filter(record => record.isCorrect).length;
+      const wrongAttempts = answerRecords.filter(record => !record.isCorrect).length;
+
+      const subjectSummary = {};
+      answerRecords.forEach(record => {
+        if (!subjectSummary[record.subject]) {
+          subjectSummary[record.subject] = {
+            subject: record.subject,
+            subjectName: record.subjectName,
+            correct: 0,
+            wrong: 0,
+            attempts: 0
+          };
+        }
+
+        subjectSummary[record.subject].attempts += 1;
+        if (record.isCorrect) {
+          subjectSummary[record.subject].correct += 1;
+        } else {
+          subjectSummary[record.subject].wrong += 1;
+        }
+      });
+
+      const stableSubjects = Object.values(subjectSummary)
+        .filter(item => item.correct > 0 && item.wrong === 0)
+        .map(item => item.subject);
+
+      const needsReviewSubjects = Object.values(subjectSummary)
+        .filter(item => item.wrong > 0)
+        .map(item => item.subject);
+
+      return {
+        gameTitle: "校園密室逃脫：消失的鑰匙",
+        totalLevels: selectedLevels.length,
+        completedLevels: codePieces.length,
+        totalAttempts,
+        correctAttempts,
+        wrongAttempts,
+        wrongCount,
+        finalCode: codePieces.join(""),
+        collectedCodePieces: [...codePieces],
+        completedSubjects: [...correctSubjects],
+        stableSubjects,
+        needsReviewSubjects,
+        subjectSummary: Object.values(subjectSummary),
+        wrongRecords: [...wrongRecords]
+      };
+    }
+
+    async function loadAiMissionReport(fallbackReport) {
+      const aiReportText = document.getElementById("aiReportText");
+      const aiReportNote = document.getElementById("aiReportNote");
+      const performance = buildPerformanceSummary();
+
+      try {
+        const response = await fetch("/api/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            studentInfo,
+            performance,
+            answers: answerRecords
+          })
+        });
+
+        const result = await response.json();
+        const aiReport = result.feedback || fallbackReport;
+
+        aiReportText.classList.remove("loading");
+        aiReportText.textContent = aiReport;
+
+        if (result.mode === "fallback") {
+          aiReportNote.textContent = "目前未成功使用 AI，已顯示系統基本任務報告。";
+        } else {
+          aiReportNote.textContent = "此報告由 AI 依據本次闖關紀錄產生。";
+        }
+
+        postLog("ai_report_generated", {
+          mode: result.mode || "unknown",
+          aiReport,
+          performance
+        });
+      } catch (error) {
+        aiReportText.classList.remove("loading");
+        aiReportText.textContent = fallbackReport;
+        aiReportNote.textContent = "AI 回饋暫時連線失敗，已顯示系統基本任務報告。";
+
+        postLog("ai_report_failed", {
+          error: error.message,
+          fallbackReport,
+          performance
+        });
+      }
     }
 
     function generateWrongReview() {
